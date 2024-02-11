@@ -14,7 +14,32 @@ const {
 	UPLOAD_DIRECTORY,
 	UPLOAD_MAX_SIZE,
 	UPLOAD_ID_LEN,
+	CACHE_ENABLED,
 } = process.env;
+
+const pages = {};
+
+/**
+ * Get an asset from the fs
+ * @param {*} assetName the asset
+ * @description this function will get an asset from the fs and cache it if necessary
+ * @returns the asset
+ */
+const getAsset = async (assetName) => {
+	if (pages[assetName]) {
+		return pages[assetName];
+	}
+	try {
+		let asset = await readFile(`./public/${assetName}`, 'utf-8');
+		if (CACHE_ENABLED === 'true') {
+			pages[assetName] = asset;
+		}
+		return asset;
+	} catch (e) {
+		console.error("Error: couldn't read asset", assetName);
+		return null;
+	}
+};
 
 const routes = {
 	/**
@@ -24,7 +49,7 @@ const routes = {
 	 */
 	'^/$': async (req, res) => {
 		res.writeHead(200, { 'Content-Type': 'text/html' });
-		const page = (await readFile('./public/index.html', 'utf-8'))
+		const page = (await getAsset('index.html'))
 			.toString()
 			.replaceAll(
 				'{{ max_file_size_pretty }}',
@@ -43,7 +68,7 @@ const routes = {
 	'^/d/(.*)/(.*)$': async (req, res, id, file) => {
 		if (id.length < 1 || file.length === 0) {
 			res.writeHead(404, { 'Content-Type': 'text/html' });
-			res.end(await readFile('./public/error.html'));
+			res.end(await getAsset('error.html'));
 			return;
 		}
 		try {
@@ -86,12 +111,12 @@ const routes = {
 	'^/v/(.*)/(.*)$': async (req, res, id, file) => {
 		if (id.length < 1 || file.length === 0) {
 			res.writeHead(404, { 'Content-Type': 'text/html' });
-			res.end(await readFile('./public/error.html'));
+			res.end(await getAsset('error.html'));
 			return;
 		}
 		try {
 			const info = await stat(`./${UPLOAD_DIRECTORY}/${id}/${file}`);
-			res.writeHead(200, { 'Content-Type': 'text/html' });
+
 			let filename = file;
 			if (file.length > 32 && file.split('.').length > 4) {
 				// truncate the filename (fileasdasd...txt)
@@ -111,7 +136,7 @@ const routes = {
 	${createPreview(file, preview)}
 </div>`;
 
-			const page = (await readFile('./public/preview.html', 'utf-8'))
+			const page = (await getAsset('preview.html'))
 				.toString()
 				.replaceAll(
 					'{{ url }}',
@@ -121,6 +146,7 @@ const routes = {
 				.replaceAll('{{ size }}', `${info.size}`)
 				.replaceAll('{{ size_pretty }}', `${prettifySize(info.size)}`)
 				.replaceAll('{{ preview }}', previewPage);
+			res.writeHead(200, { 'Content-Type': 'text/html' });
 			res.end(page);
 		} catch (e) {
 			// file does not exist
@@ -177,7 +203,7 @@ const routes = {
 	 */
 	'^\\/uploaded\\?id=(.*)&file=(.*)$': async (req, res, id, file) => {
 		res.writeHead(200, { 'Content-Type': 'text/html' });
-		const page = (await readFile('./public/uploaded.html', 'utf-8'))
+		const page = (await getAsset('uploaded.html'))
 			.toString()
 			.replaceAll('{{ url }}', `${req.headers.referer}d/${id}/${file}`)
 			.replaceAll('{{ filename }}', `${file}`)
@@ -234,7 +260,10 @@ const routes = {
 			name = `${genToken(6)}.${fromMime(req.headers['content-type'])}`;
 		}
 
-		if (req.headers['content-type'].includes('multipart/form-data')) {
+		if (
+			req.headers['content-type'] &&
+			req.headers['content-type'].includes('multipart/form-data')
+		) {
 			formfile = true && process.env.FORMFILE_SUPPORT === 'true';
 		}
 
@@ -305,7 +334,7 @@ const routes = {
 	 */
 	'^/favicon.svg$': async (req, res) => {
 		res.writeHead(200, { 'Content-Type': mimeFor('.svg') });
-		res.end(await readFile('./public/favicon.svg'));
+		res.end(await getAsset('favicon.svg'));
 	},
 	/**
 	 * The favicon
@@ -314,7 +343,7 @@ const routes = {
 	 */
 	'^/main.css$': async (req, res) => {
 		res.writeHead(200, { 'Content-Type': mimeFor('.css') });
-		res.end(await readFile('./public/main.css'));
+		res.end(await getAsset('main.css'));
 	},
 };
 
@@ -327,7 +356,7 @@ const handler = async (req, res) => {
 
 	if (!route) {
 		res.writeHead(404, { 'Content-Type': 'text/html' });
-		res.end(await readFile('./public/error.html'));
+		res.end(await getAsset('error.html'));
 		return;
 	}
 
@@ -403,4 +432,11 @@ server.createServer(opts, handler).listen(WEB_PORT, () => {
 	console.log(
 		`[!] Server running at ${SSL_ENABLED === 'true' ? 'https' : 'http'}://${APP_DOMAIN ?? 'localhost'}:${WEB_PORT}/`
 	);
+
+	// print configuration info
+	console.log(`[!] Configuration`);
+	console.log(`\t- SSL_ENABLED: ${SSL_ENABLED}`);
+	console.log(`\t- APP_DOMAIN: ${APP_DOMAIN}`);
+	console.log(`\t- UPLOAD_DIRECTORY: ${UPLOAD_DIRECTORY}`);
+	console.log(`\t- CACHE_ENABLED: ${CACHE_ENABLED}`);
 });
