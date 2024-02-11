@@ -15,7 +15,7 @@
 			<div class="max-w-lg flex flex-col gap-y-6 w-full">
 				<div>
 					<div
-						class="mt-2 flex justify-center rounded-lg border border-dashed border-neutral-800 px-6 py-10 relative"
+						class="mt-2 flex justify-center droparea transition-colors ease-in-out delay-150 duration-300 rounded-lg border border-dashed border-neutral-800 px-6 py-10 relative"
 					>
 						<div class="text-center">
 							<svg
@@ -48,7 +48,7 @@
 								<p class="pl-1">or drag and drop</p>
 							</div>
 							<p class="text-xs leading-5 text-neutral-300">
-								Maximum file size 1GB
+								Maximum file size is {{ max_file_size_pretty }}
 							</p>
 						</div>
 					</div>
@@ -86,11 +86,24 @@
 			const postFile = (file) => {
 				topbar.show();
 
+				// check file size
+				if (file.size > MAX_FILE_SIZE) {
+					topbar.hide();
+					// set border on drop area
+					const droparea = document.querySelector('.droparea');
+					droparea.classList.add('border-red-500');
+
+					setTimeout(() => {
+						droparea.classList.remove('border-red-500');
+					}, 1000);
+					return;
+				}
+
 				// post to /upload
 				fetch('/upload', {
 					method: 'POST',
 					headers: {
-						filename: file.name,
+						filename: encodeURIComponent(file.name),
 					},
 					body: file,
 				})
@@ -100,7 +113,13 @@
 							// we got an error
 							console.error(`${data.status}: ${data.message}`);
 							topbar.hide();
-							//@TODO: Show upload failed screen
+							// set border on drop area
+							const droparea = document.querySelector('.droparea');
+							droparea.classList.add('border-red-500');
+
+							setTimeout(() => {
+								droparea.classList.remove('border-red-500');
+							});
 							return;
 						}
 						topbar.hide();

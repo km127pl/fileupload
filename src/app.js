@@ -1,8 +1,7 @@
 import { readFile, stat, mkdir, writeFile } from 'node:fs/promises';
 import { Stream } from 'node:stream';
 
-// we want this to be dependency free
-import { canPreview, createPreview, fromMime, mimeFor } from './mime.js';
+import { createPreview, fromMime, mimeFor } from './mime.js';
 import { encrypt, decrypt } from './encryption.js';
 
 const {
@@ -25,7 +24,14 @@ const routes = {
 	 */
 	'^/$': async (req, res) => {
 		res.writeHead(200, { 'Content-Type': 'text/html' });
-		res.end(await readFile('./public/index.html'));
+		const page = (await readFile('./public/index.html', 'utf-8'))
+			.toString()
+			.replaceAll(
+				'{{ max_file_size_pretty }}',
+				`${prettifySize(parseInt(UPLOAD_MAX_SIZE))}`
+			)
+			.replaceAll('MAX_FILE_SIZE', `${UPLOAD_MAX_SIZE}`);
+		res.end(page);
 	},
 	/**
 	 * File download page
@@ -99,8 +105,6 @@ const routes = {
 				const decrypted = decrypt(preview.toString());
 				preview = decrypted;
 			}
-
-			const shouldPreview = canPreview(file);
 
 			const previewPage = `
 <div class="flex flex-col w-full bg-neutral-900 p-1 sm:rounded-xl text-sm sm:border sm:border-white/5 h-96 overflow-auto">
@@ -301,6 +305,7 @@ const routes = {
 
 const handler = async (req, res) => {
 	console.log(`[!] ${req.method} ${req.url}`);
+
 	const route = Object.keys(routes).filter((route) =>
 		req.url.match(route)
 	)[0];
@@ -356,14 +361,14 @@ const uri = (...routes) => {
  * prettifySize(1024 * 1024) // 1 MB
  */
 const prettifySize = (size) => {
-	size = parseInt(size) / 4; // size as reported by POST request is 4 times the actual size
 	const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
 	let counter = 0;
-	while (size > 1024) {
+	while (size >= 1024) {
 		size /= 1024;
 		counter += 1;
 	}
-	return `${size.toFixed(2)} ${units[counter]}`;
+	const fixedPoints = size <= 10 ? 2 : 0;
+	return `${size.toFixed(fixedPoints).split('.00').join('')} ${units[counter]}`;
 };
 
 let server = await import('node:http');
