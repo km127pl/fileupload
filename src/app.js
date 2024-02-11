@@ -55,7 +55,7 @@ const routes = {
 	"^/i/(.*)/(.*)$": async (req, res, id, file) => {
 		try {
 			const info = await stat(
-				`./${config.upload.directory}/${id}/${file}`
+				`./${config.upload.directory}/${id}/${file}`,
 			);
 			res.writeHead(200, { "Content-Type": "application/json" });
 			res.end(
@@ -66,7 +66,7 @@ const routes = {
 					size: info.size,
 					created: info.birthtime,
 					type: mimeFor(file),
-				})
+				}),
 			);
 		} catch (e) {
 			// file does not exist
@@ -75,7 +75,7 @@ const routes = {
 				JSON.stringify({
 					status: "error",
 					description: "File not found",
-				})
+				}),
 			);
 			return;
 		}
@@ -127,7 +127,7 @@ const routes = {
 
 		// create a write stream
 		const ws = createWriteStream(
-			`./${config.upload.directory}/${id}/${name}`
+			`./${config.upload.directory}/${id}/${name}`,
 		);
 
 		ws.on("error", (error) => {
@@ -146,7 +146,7 @@ const routes = {
 					JSON.stringify({
 						file: name,
 						id: id,
-					})
+					}),
 				);
 			});
 		});
@@ -155,7 +155,7 @@ const routes = {
 
 const handler = async (req, res) => {
 	const route = Object.keys(routes).filter((route) =>
-		req.url.match(route)
+		req.url.match(route),
 	)[0];
 
 	if (!route) {
@@ -183,7 +183,7 @@ const genToken = (length) => {
 
 	while (counter < length) {
 		result += characters.charAt(
-			Math.floor(Math.random() * charactersLength)
+			Math.floor(Math.random() * charactersLength),
 		);
 		counter += 1;
 	}
@@ -193,6 +193,6 @@ const genToken = (length) => {
 
 http.createServer(handler).listen(config.webserver.port, () => {
 	console.log(
-		`[!] Server running at http://localhost:${config.webserver.port}/`
+		`[!] Server running at http://localhost:${config.webserver.port}/`,
 	);
 });
