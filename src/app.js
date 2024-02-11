@@ -200,6 +200,20 @@ const routes = {
 			});
 		});
 	},
+	/**
+	 * The favicon
+	 * @method GET
+	 * @route /favicon.svg
+	 */
+	/**
+	 * Homepage
+	 * @method GET
+	 * @route /
+	 */
+	'^/favicon.svg$': async (req, res) => {
+		res.writeHead(200, { 'Content-Type': mimeFor('.svg') });
+		res.end(await readFile('./public/favicon.svg'));
+	},
 };
 
 const handler = async (req, res) => {

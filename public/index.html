@@ -3,6 +3,7 @@
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<link rel="icon" href="favicon.svg" />
 		<script src="https://cdn.tailwindcss.com"></script>
 		<title>File Upload</title>
 	</head>
@@ -53,10 +54,13 @@
 				</div>
 			</div>
 		</div>
+		<script src="https://unpkg.com/topbar@2.0.2/topbar.min.js" defer></script>
+
 		<script>
 			document.getElementById('file-upload').addEventListener('change', (e) => {
 				const file = e.target.files[0];
 				if (file == null) return;
+				topbar.show();
 
 				// post to /upload
 				fetch('/upload', {
@@ -68,6 +72,7 @@
 				})
 					.then((res) => res.json())
 					.then((data) => {
+						topbar.hide();
 						location.href = `/uploaded?id=${data.id}&file=${data.file}`;
 					});
 			});
@@ -83,6 +88,8 @@
 			});
 			drop.addEventListener('drop', (e) => {
 				e.preventDefault();
+				topbar.show();
+
 				drop.classList.remove('bg-neutral-900');
 				const file = e.dataTransfer.files[0];
 				if (file == null) return;
@@ -97,6 +104,7 @@
 				})
 					.then((res) => res.json())
 					.then((data) => {
+						topbar.hide();
 						location.href = `/uploaded?id=${data.id}&file=${data.file}`;
 					});
 			});
