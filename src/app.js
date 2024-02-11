@@ -1,10 +1,10 @@
 import http from "node:http";
 import { readFile, stat, mkdir } from "node:fs/promises";
-
 import { createWriteStream } from "node:fs";
 
 // we want this to be dependency free
 import { fromMime, mimeFor } from "./mime.js";
+import { config } from "./config.js";
 
 const routes = {
 	/**
@@ -25,7 +25,7 @@ const routes = {
 	 */
 	"^/d/(.*)/(.*)$": async (req, res, id, file) => {
 		try {
-			await stat(`./uploads/${id}/${file}`);
+			await stat(`./${config.upload.directory}/${id}/${file}`);
 		} catch (e) {
 			// file does not exist
 			res.writeHead(302, {
@@ -36,7 +36,7 @@ const routes = {
 		}
 
 		// read file
-		const f = await readFile(`./uploads/${id}/${file}`);
+		const f = await readFile(`./${config.upload.directory}/${id}/${file}`);
 
 		// send file
 		res.writeHead(200, {
@@ -73,15 +73,15 @@ const routes = {
 		res.setHeader("Content-Type", "application/json");
 
 		let len = parseInt(req.headers["content-length"]);
-		if (isNaN(len) || len <= 0 || len > 1024 * 1024 * 1024) {
+		if (isNaN(len) || len <= 0 || len > config.upload.maxSize) {
 			// 1GB
 			res.statusCode = 411;
 			res.end();
 			return;
 		}
 
-		const id = genToken(12);
-		mkdir(`./uploads/${id}`);
+		const id = genToken(config.privacy.idLength);
+		mkdir(`./${config.upload.directory}/${id}`);
 
 		// original filename
 		let name = req.headers["filename"];
@@ -90,7 +90,9 @@ const routes = {
 		}
 
 		// create a write stream
-		const ws = createWriteStream(`./uploads/${id}/${name}`);
+		const ws = createWriteStream(
+			`./${config.upload.directory}/${id}/${name}`
+		);
 
 		ws.on("error", (error) => {
 			console.error(error);
@@ -153,4 +155,8 @@ const genToken = (length) => {
 	return result;
 };
 
-http.createServer(handler).listen(8080);
+http.createServer(handler).listen(config.webserver.port, () => {
+	console.log(
+		`[!] Server running at http://localhost:${config.webserver.port}/`
+	);
+});
