@@ -60,21 +60,7 @@
 			document.getElementById('file-upload').addEventListener('change', (e) => {
 				const file = e.target.files[0];
 				if (file == null) return;
-				topbar.show();
-
-				// post to /upload
-				fetch('/upload', {
-					method: 'POST',
-					headers: {
-						filename: file.name,
-					},
-					body: file,
-				})
-					.then((res) => res.json())
-					.then((data) => {
-						topbar.hide();
-						location.href = `/uploaded?id=${data.id}&file=${data.file}`;
-					});
+				postFile(file);
 			});
 
 			// drag and drop upload
@@ -88,11 +74,16 @@
 			});
 			drop.addEventListener('drop', (e) => {
 				e.preventDefault();
-				topbar.show();
 
 				drop.classList.remove('bg-neutral-900');
 				const file = e.dataTransfer.files[0];
 				if (file == null) return;
+
+				postFile(file);
+			});
+
+			const postFile = (file) => {
+				topbar.show();
 
 				// post to /upload
 				fetch('/upload', {
@@ -104,10 +95,17 @@
 				})
 					.then((res) => res.json())
 					.then((data) => {
+						if (!(data.id && data.file)) {
+							// we got an error
+							console.error(`${data.status}: ${data.message}`);
+							topbar.hide();
+							//@TODO: Show upload failed screen
+							return;
+						}
 						topbar.hide();
 						location.href = `/uploaded?id=${data.id}&file=${data.file}`;
 					});
-			});
+			};
 		</script>
 	</body>
 </html>

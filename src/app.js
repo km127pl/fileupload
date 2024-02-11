@@ -133,10 +133,25 @@ const routes = {
 		res.setHeader('Content-Type', 'application/json');
 
 		let len = parseInt(req.headers['content-length']);
-		if (isNaN(len) || len <= 0 || len > UPLOAD_MAX_SIZE) {
-			// 1GB
+		if (isNaN(len) || len <= 0) {
 			res.statusCode = 411;
-			res.end();
+			res.end(
+				JSON.stringify({
+					status: 411,
+					message: 'LENGTH_REQUIRED',
+				})
+			);
+			return;
+		}
+
+		if (len > UPLOAD_MAX_SIZE) {
+			res.statusCode = 413;
+			res.end(
+				JSON.stringify({
+					status: 413,
+					message: 'REQUEST_TOO_LARGE',
+				})
+			);
 			return;
 		}
 
