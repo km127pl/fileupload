@@ -2,7 +2,7 @@ import { readFile, stat, mkdir, writeFile } from 'node:fs/promises';
 import { Stream } from 'node:stream';
 
 // we want this to be dependency free
-import { canPreview, fromMime, mimeFor } from './mime.js';
+import { canPreview, createPreview, fromMime, mimeFor } from './mime.js';
 import { encrypt, decrypt } from './encryption.js';
 
 const {
@@ -103,8 +103,8 @@ const routes = {
 			const shouldPreview = canPreview(file);
 
 			const previewPage = `
-<div class="flex flex-col w-full bg-neutral-900 p-6 sm:rounded-xl sm:border sm:border-white/5 h-screen sm:h-auto">
-	${shouldPreview ? `<img src="data:${mimeFor(file)};base64,${preview.toString('base64')}" class="w-1/2 mx-auto" />` : '<span class="text-white">This file cannot be previewed</span>'}
+<div class="flex flex-col w-full bg-neutral-900 p-1 sm:rounded-xl text-sm sm:border sm:border-white/5 h-96 overflow-auto">
+	${createPreview(file, preview)}
 </div>`;
 
 			const page = (await readFile('./public/preview.html', 'utf-8'))
@@ -284,14 +284,18 @@ const routes = {
 	 * @method GET
 	 * @route /favicon.svg
 	 */
-	/**
-	 * Homepage
-	 * @method GET
-	 * @route /
-	 */
 	'^/favicon.svg$': async (req, res) => {
 		res.writeHead(200, { 'Content-Type': mimeFor('.svg') });
 		res.end(await readFile('./public/favicon.svg'));
+	},
+	/**
+	 * The favicon
+	 * @method GET
+	 * @route /favicon.svg
+	 */
+	'^/main.css$': async (req, res) => {
+		res.writeHead(200, { 'Content-Type': mimeFor('.css') });
+		res.end(await readFile('./public/main.css'));
 	},
 };
 

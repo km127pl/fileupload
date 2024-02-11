@@ -1,3 +1,6 @@
+> [!CAUTION]
+> Not ready for production use, use at your own risk.
+
 ## File Upload
 
 ![](https://img.shields.io/badge/Node%20js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
@@ -16,11 +19,12 @@ A quick file upload server in pure NodeJS and HTML.
 
 ### Todo
 
--   [ ] -   `/v/{id}/{file}` for previewing files
--   [ ] -   Syntax hightlighted preview for code files (.c, .js etc.)
+-   [x] -   Syntax hightlighted preview for code files (.c, .js etc.)
 -   [ ] -   In memory file cache (warm)
 -   [ ] -   Properly use tailwindcss and not the play cdn
 -   [ ] -   [ShareX](https://getsharex.com/) support
+-   [ ] -   Rate limiting (10 per 2 minutes)
+-   [x] -   `/v/{id}/{file}` for previewing files
 -   [x] -   Fix getting a "411 Length Required" on some bigger files
 -   [x] -   Handle images (as well as other Non-UTF8 files)
 -   [x] -   Full on drag n' drop support on `/`
@@ -35,4 +39,5 @@ A quick file upload server in pure NodeJS and HTML.
 -   `GET /uploaded?id={}&file={}` - File uploaded successfuly dialog
 -   `GET /i/{id}/{file}` - File info endpoint
 -   `GET /d/{id}/{file}` - File download endpoint
+-   `GET /v/{id}/{file}` - File view endpoint
 -   `POST /upload` - File upload endpoint

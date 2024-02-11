@@ -73,3 +73,45 @@ export const canPreview = (filename) => {
 		ext
 	);
 };
+
+export const previewTypes = {
+	png: 'image',
+	jpg: 'image',
+	gif: 'image',
+	mp4: 'video',
+	mp3: 'audio',
+	avi: 'video',
+	pdf: 'pdf',
+	txt: 'code',
+	c: 'code',
+	cpp: 'code',
+	java: 'code',
+	py: 'code',
+	js: 'code',
+	html: 'code',
+	css: 'code',
+	sh: 'code',
+	sql: 'code',
+	xml: 'code',
+	json: 'code',
+};
+
+const previewTypeFor = (filename) => {
+	const ext = filename.split('.').pop();
+	return previewTypes[ext] || 'code';
+};
+
+export const createPreview = (filename, content) => {
+	const type = previewTypeFor(filename);
+
+	switch (type) {
+		case 'image':
+			return `<img src="data:${mimeFor(file)};base64,${content.toString('base64')}" class="w-1/2 mx-auto" />`;
+		case 'audio':
+			return `<audio controls><source src="data:${mimeFor(file)};base64,${content.toString('base64')}" type="${mimeFor(file)}" /></audio>`;
+		case 'code':
+			return `<pre><code>${content.toString()}</code></pre>`;
+		default:
+			return `<span class="text-white">This file cannot be previewed</span>`;
+	}
+};
