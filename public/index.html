@@ -8,7 +8,7 @@
 	</head>
 	<body>
 		<div
-			class="flex flex-col bg-neutral-950 min-h-screen items-center justify-center"
+			class="flex flex-col bg-neutral-950 min-h-screen items-center justify-center drop"
 		>
 			<div class="max-w-lg flex flex-col gap-y-6 w-full">
 				<div>
@@ -53,7 +53,7 @@
 						</div>
 					</div>
 				</div>
-				<div class="flex items-center justify-center gap-x-6">
+				<!-- <div class="flex items-center justify-center gap-x-6">
 					<button
 						type="reset"
 						class="text-sm font-semibold leading-6 text-white outline-white"
@@ -66,7 +66,7 @@
 					>
 						Upload
 					</button>
-				</div>
+				</div> -->
 				<!-- <div
           class="block w-full rounded-md border-0 bg-white/5 px-3 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
         >
@@ -94,6 +94,38 @@
 							location.href = `/uploaded?id=${data.id}&file=${data.file}`;
 						});
 				});
+
+			// drag and drop upload
+			const drop = document.querySelector(".drop");
+			drop.addEventListener("dragover", (e) => {
+				e.preventDefault();
+				drop.classList.add("bg-neutral-900");
+			});
+			drop.addEventListener("dragleave", (e) => {
+				drop.classList.remove("bg-neutral-900");
+			});
+			drop.addEventListener("drop", (e) => {
+				e.preventDefault();
+				drop.classList.remove("bg-neutral-900");
+				const file = e.dataTransfer.files[0];
+				if (file == null) return;
+
+				// post to /upload
+				fetch("/upload", {
+					method: "POST",
+					headers: {
+						filename: file.name,
+					},
+					body: file,
+				})
+					.then((res) => res.json())
+					.then((data) => {
+						location.href = `/uploaded?id=${data.id}&file=${data.file}`;
+					});
+			});
+			drop.addEventListener("click", () => {
+				document.getElementById("file-upload").click();
+			});
 		</script>
 	</body>
 </html>
