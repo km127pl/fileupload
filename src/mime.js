@@ -39,7 +39,6 @@ export const mimeTypes = {
  * ```
  */
 export const mimeFor = (filename) => {
-	console.log(filename);
 	const ext = filename.split('.')[1];
 	return mimeTypes[ext] || 'application/octet-stream';
 };
