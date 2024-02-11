@@ -15,6 +15,7 @@ const {
 	UPLOAD_MAX_SIZE,
 	UPLOAD_ID_LEN,
 	CACHE_ENABLED,
+	WEB_USE_HTTP2,
 } = process.env;
 
 const pages = {};
@@ -131,10 +132,7 @@ const routes = {
 				preview = decrypted;
 			}
 
-			const previewPage = `
-<div class="flex flex-col w-full bg-neutral-900 p-1 sm:rounded-xl text-sm sm:border sm:border-white/5 h-96 overflow-auto">
-	${createPreview(file, preview)}
-</div>`;
+			const previewPage = createPreview(file, preview);
 
 			const page = (await getAsset('preview.html'))
 				.toString()
@@ -150,6 +148,7 @@ const routes = {
 			res.end(page);
 		} catch (e) {
 			// file does not exist
+			console.error(e);
 			res.writeHead(404);
 			res.end(
 				JSON.stringify({
@@ -415,12 +414,15 @@ const prettifySize = (size) => {
 	return `${size.toFixed(fixedPoints).split('.00').join('')} ${units[counter]}`;
 };
 
-let server = await import('node:http');
+let createServer =
+	WEB_USE_HTTP2 === 'true'
+		? (await import('node:http2')).createServer
+		: (await import('node:http')).createServer;
 let opts = {};
 
 if (SSL_ENABLED === 'true') {
 	try {
-		server = await import('node:https');
+		createServer = (await import('node:http2')).createSecureServer;
 		opts['key'] = await readFile(SSL_KEY, 'utf-8');
 		opts['cert'] = await readFile(SSL_CERT, 'utf-8');
 	} catch (err) {
@@ -428,7 +430,7 @@ if (SSL_ENABLED === 'true') {
 	}
 }
 
-server.createServer(opts, handler).listen(WEB_PORT, () => {
+createServer(opts, handler).listen(WEB_PORT, () => {
 	console.log(
 		`[!] Server running at ${SSL_ENABLED === 'true' ? 'https' : 'http'}://${APP_DOMAIN ?? 'localhost'}:${WEB_PORT}/`
 	);
@@ -437,6 +439,7 @@ server.createServer(opts, handler).listen(WEB_PORT, () => {
 	console.log(`[!] Configuration`);
 	console.log(`\t- SSL_ENABLED: ${SSL_ENABLED}`);
 	console.log(`\t- APP_DOMAIN: ${APP_DOMAIN}`);
+	console.log(`\t- WEB_USE_HTTP2: ${WEB_USE_HTTP2}`);
 	console.log(`\t- UPLOAD_DIRECTORY: ${UPLOAD_DIRECTORY}`);
 	console.log(`\t- CACHE_ENABLED: ${CACHE_ENABLED}`);
 });

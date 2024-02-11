@@ -15,7 +15,7 @@
 	},
 	"scripts": {
 		"start": "node --env-file=.env src/app.js",
-		"dev": "nodemon --env-file=.env src/app.js",
+		"dev": "nodemon --env-file=.env.dev src/app.js",
 		"css": "tailwindcss -i src/css/styles.css -o public/main.css",
 		"css:watch": "tailwindcss -i src/css/styles.css -o public/main.css --watch",
 		"lint": "prettier --write ."

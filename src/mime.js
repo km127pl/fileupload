@@ -98,20 +98,29 @@ export const previewTypes = {
 
 const previewTypeFor = (filename) => {
 	const ext = filename.split('.').pop();
-	return previewTypes[ext] || 'code';
+	return previewTypes[ext] || 'unsupported';
 };
 
 export const createPreview = (filename, content) => {
 	const type = previewTypeFor(filename);
 
+	let preview;
+
 	switch (type) {
 		case 'image':
-			return `<img src="data:${mimeFor(file)};base64,${content.toString('base64')}" class="w-1/2 mx-auto" />`;
+			preview = `<img src="data:${mimeFor(filename)};base64,${content.toString('base64')}" class="w-1/2 mx-auto" />`;
+			break;
 		case 'audio':
-			return `<audio controls><source src="data:${mimeFor(file)};base64,${content.toString('base64')}" type="${mimeFor(file)}" /></audio>`;
+			preview = `<audio controls><source src="data:${mimeFor(filename)};base64,${content.toString('base64')}" type="${mimeFor(filename)}" /></audio>`;
+			break;
 		case 'code':
-			return `<pre><code>${content.toString()}</code></pre>`;
+			preview = `<pre><code>${content.toString()}</code></pre>`;
+			break;
 		default:
-			return `<span class="text-white">This file cannot be previewed</span>`;
+			preview = `<span class="text-white">This file cannot be previewed</span>`;
 	}
+
+	return `<div class="flex flex-col w-full bg-neutral-900 p-1 sm:rounded-xl text-sm sm:border sm:border-white/5 ${preview == 'unsupported' ? 'h-96' : 'h-auto p-4'} overflow-auto">
+${preview}
+</div>`;
 };
