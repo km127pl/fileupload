@@ -2,7 +2,7 @@ import { readFile, stat, mkdir, writeFile } from 'node:fs/promises';
 import { Stream } from 'node:stream';
 
 // we want this to be dependency free
-import { fromMime, mimeFor } from './mime.js';
+import { canPreview, fromMime, mimeFor } from './mime.js';
 import { encrypt, decrypt } from './encryption.js';
 
 const {
@@ -55,7 +55,7 @@ const routes = {
 		const f = await readFile(`./${UPLOAD_DIRECTORY}/${id}/${file}`);
 
 		// decrypt if necessary
-		if (ENCRYPTION_ENABLED) {
+		if (ENCRYPTION_ENABLED === 'true') {
 			const decrypted = decrypt(f.toString());
 			res.writeHead(200, {
 				'Content-Type': mimeFor(file),
@@ -69,6 +69,66 @@ const routes = {
 			'Content-Type': mimeFor(file),
 		});
 		res.end(f);
+	},
+	/**
+	 * File preview page
+	 * @method GET
+	 * @route /v/
+	 * @param {String} id
+	 * @param {String} file
+	 */
+	'^/v/(.*)/(.*)$': async (req, res, id, file) => {
+		if (id.length < 1 || file.length === 0) {
+			res.writeHead(404, { 'Content-Type': 'text/html' });
+			res.end(await readFile('./public/error.html'));
+			return;
+		}
+		try {
+			const info = await stat(`./${UPLOAD_DIRECTORY}/${id}/${file}`);
+			res.writeHead(200, { 'Content-Type': 'text/html' });
+			let filename = file;
+			if (file.length > 32 && file.split('.').length > 4) {
+				// truncate the filename (fileasdasd...txt)
+				filename = `${file.substring(0, 32)}...${file.split('.').pop()}`;
+			}
+
+			let preview = await readFile(`./${UPLOAD_DIRECTORY}/${id}/${file}`);
+
+			// decrypt
+			if (ENCRYPTION_ENABLED === 'true') {
+				const decrypted = decrypt(preview.toString());
+				preview = decrypted;
+			}
+
+			const shouldPreview = canPreview(file);
+
+			const previewPage = `
+<div class="flex flex-col w-full bg-neutral-900 p-6 sm:rounded-xl sm:border sm:border-white/5 h-screen sm:h-auto">
+	${shouldPreview ? `<img src="data:${mimeFor(file)};base64,${preview.toString('base64')}" class="w-1/2 mx-auto" />` : '<span class="text-white">This file cannot be previewed</span>'}
+</div>`;
+
+			const page = (await readFile('./public/preview.html', 'utf-8'))
+				.toString()
+				.replaceAll(
+					'{{ url }}',
+					`${SSL_ENABLED === 'true' ? 'https' : 'http'}://${APP_DOMAIN ?? 'localhost'}/d/${id}/${file}`
+				)
+				.replaceAll('{{ filename }}', `${filename}`)
+				.replaceAll('{{ size }}', `${info.size}`)
+				.replaceAll('{{ size_pretty }}', `${prettifySize(info.size)}`)
+				.replaceAll('{{ preview }}', previewPage);
+			res.end(page);
+		} catch (e) {
+			// file does not exist
+			res.writeHead(404);
+			res.end(
+				JSON.stringify({
+					status: 'error',
+					description: 'File not found',
+				})
+			);
+			return;
+		}
 	},
 	/**
 	 * File info page
@@ -116,7 +176,11 @@ const routes = {
 		const page = (await readFile('./public/uploaded.html', 'utf-8'))
 			.toString()
 			.replaceAll('{{ url }}', `${req.headers.referer}d/${id}/${file}`)
-			.replaceAll('{{ filename }}', `${file}`);
+			.replaceAll('{{ filename }}', `${file}`)
+			.replaceAll(
+				'{{ preview_url }}',
+				`${req.headers.referer}v/${id}/${file}`
+			);
 		res.end(page);
 	},
 	/**
@@ -196,7 +260,7 @@ const routes = {
 
 		req.on('end', () => {
 			ws.close((buf) => {
-				if (ENCRYPTION_ENABLED) {
+				if (ENCRYPTION_ENABLED === 'true') {
 					// encrypt the file
 					const encrypted = encrypt(buf);
 
@@ -232,6 +296,7 @@ const routes = {
 };
 
 const handler = async (req, res) => {
+	console.log(`[!] ${req.method} ${req.url}`);
 	const route = Object.keys(routes).filter((route) =>
 		req.url.match(route)
 	)[0];
@@ -269,10 +334,38 @@ const genToken = (length) => {
 	return result;
 };
 
+/**
+ * Get a uri based on the routes and the app configuration
+ * @param  {...any} routes the routes
+ * @returns the uri
+ */
+const uri = (...routes) => {
+	return `${SSL_ENABLED === 'true' ? 'https' : 'http'}://${APP_DOMAIN ?? 'localhost'}:${routes.join('/')}`;
+};
+
+/**
+ * Prettify a size
+ * @param {*} size the size
+ * @returns the pretty size
+ * @example
+ * prettifySize(1024) // 1 KB
+ * prettifySize(1024 * 1024) // 1 MB
+ */
+const prettifySize = (size) => {
+	size = parseInt(size) / 4; // size as reported by POST request is 4 times the actual size
+	const units = ['B', 'KiB', 'MiB', 'GiB', 'TiB'];
+	let counter = 0;
+	while (size > 1024) {
+		size /= 1024;
+		counter += 1;
+	}
+	return `${size.toFixed(2)} ${units[counter]}`;
+};
+
 let server = await import('node:http');
 let opts = {};
 
-if (SSL_ENABLED) {
+if (SSL_ENABLED === 'true') {
 	try {
 		server = await import('node:https');
 		opts['key'] = await readFile(SSL_KEY, 'utf-8');
@@ -284,6 +377,6 @@ if (SSL_ENABLED) {
 
 server.createServer(opts, handler).listen(WEB_PORT, () => {
 	console.log(
-		`[!] Server running at ${SSL_ENABLED ? 'https' : 'http'}://${APP_DOMAIN ?? 'localhost'}:${WEB_PORT}/`
+		`[!] Server running at ${SSL_ENABLED === 'true' ? 'https' : 'http'}://${APP_DOMAIN ?? 'localhost'}:${WEB_PORT}/`
 	);
 });

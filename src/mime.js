@@ -61,3 +61,15 @@ export const fromMime = (mimeType) => {
 	}
 	return null;
 };
+
+/**
+ * Checks if a file can be previewed
+ * @param {*} filename the filename
+ * @returns true if the file can be previewed
+ */
+export const canPreview = (filename) => {
+	const ext = filename.split('.').pop();
+	return ['png', 'jpg', 'gif', 'mp4', 'mp3', 'avi', 'pdf', 'txt'].includes(
+		ext
+	);
+};

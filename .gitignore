@@ -5,7 +5,7 @@ uploads/
 node_modules/
 yarn.lock
 
-.env
+*.env
 !.env.example
 
 # certs

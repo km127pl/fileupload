@@ -4,6 +4,14 @@
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<script src="https://cdn.tailwindcss.com"></script>
+		<meta property="og:title" content="File Upload" />
+		<meta property="og:type" content="website" />
+		<meta property="og:image" content="/favicon.svg" />
+		<meta
+			property="og:description"
+			content="{{ filename }}\n~{{ size_pretty }}"
+		/>
+		<meta name="theme-color" content="#4ade80" />
 		<link rel="icon" href="favicon.svg" />
 
 		<title>File Upload | {{ filename }}</title>
@@ -20,26 +28,17 @@
 						<p
 							class="text-lg/7 font-semibold tracking-tight sm:text-base/7 text-white"
 						>
-							File Uploaded
+							File preview
 						</p>
-						<svg
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="2"
-							stroke="currentColor"
-							class="w-6 h-6 text-green-400"
-							aria-hidden="true"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-							/>
-						</svg>
 					</div>
+					<code class="mt-2 mb-2 text-base sm:text-sm/2 text-neutral-100"
+						>{{ filename }}</code
+					>
+					{{ preview }}
+
 					<p
 						data-slot="text"
-						class="mt-8 text-base/6 sm:text-sm/6 text-neutral-400"
+						class="mt-2 text-base/6 sm:text-sm/6 text-neutral-400"
 					>
 						Share this link with anyone you want to share the file with.
 					</p>
@@ -50,10 +49,9 @@
 							name="link"
 							id="link"
 							autocomplete="link"
-							class="block w-full rounded-md border-0 bg-white/5 px-3 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/[.1] hover:ring-white/[.2] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 select-all cursor-text"
+							class="block w-full rounded-md border-0 bg-white/5 px-3 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/[.1] hover:ring-white/[.2] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 select-all"
 							readonly
 							value="{{ url }}"
-							onfocus="this.select()"
 						/>
 						<button
 							class="text-white font-semibold text-sm px-3 py-1.5 shrink-0 border border-white/15 rounded-md hover:bg-white/5 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500"
@@ -64,16 +62,16 @@
 					</div>
 					<div class="mt-8 flex">
 						<button
-							class="text-white bg-neutral-600 font-semibold text-sm px-3 py-1.5 shrink-0 border border-white/15 rounded-md hover:bg-neutral-500/70 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500 w-full sm:w-auto"
-							onclick="location.href='/'"
+							class="text-red-500 bg-none font-semibold text-sm px-3 py-1.5 shrink-0 border border-red-500 rounded-md hover:bg-red-500/70 hover:text-white focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500 w-full sm:w-auto"
+							onclick="console.error('TODO: Report file')"
 						>
-							Upload more
+							Report
 						</button>
 						<button
-							class="text-white bg-neutral-600 font-semibold ml-2 text-sm px-3 py-1.5 shrink-0 border border-white/15 rounded-md hover:bg-neutral-500/70 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500 w-full sm:w-auto"
-							onclick="location.href='{{ preview_url }}'"
+							class="text-white ml-2 bg-blue-600 font-semibold text-sm px-3 py-1.5 shrink-0 border border-white/15 rounded-md hover:bg-blue-700/70 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500 w-full sm:w-auto"
+							onclick="location.href='{{ url }}'"
 						>
-							Preview
+							Download
 						</button>
 					</div>
 				</div>

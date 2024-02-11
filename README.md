@@ -21,7 +21,7 @@ A quick file upload server in pure NodeJS and HTML.
 -   [ ] -   In memory file cache (warm)
 -   [ ] -   Properly use tailwindcss and not the play cdn
 -   [ ] -   [ShareX](https://getsharex.com/) support
--   [ ] -   Fix getting a "411 Length Required" on some bigger files
+-   [x] -   Fix getting a "411 Length Required" on some bigger files
 -   [x] -   Handle images (as well as other Non-UTF8 files)
 -   [x] -   Full on drag n' drop support on `/`
 -   [x] -   File size limits
