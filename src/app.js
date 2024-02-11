@@ -120,7 +120,7 @@ const routes = {
 		mkdir(`./${config.upload.directory}/${id}`);
 
 		// original filename
-		let name = req.headers["filename"];
+		let name = encodeURIComponent(req.headers["filename"]);
 		if (name == null) {
 			name = `${genToken(6)}.${fromMime(req.headers["content-type"])}`;
 		}
