@@ -45,6 +45,42 @@ const routes = {
 		res.end(f);
 	},
 	/**
+	 * File info page
+	 * @method GET
+	 * @route /i/
+	 * @param {String} id
+	 * @param {String} file
+	 * @returns JSON
+	 */
+	"^/i/(.*)/(.*)$": async (req, res, id, file) => {
+		try {
+			const info = await stat(
+				`./${config.upload.directory}/${id}/${file}`
+			);
+			res.writeHead(200, { "Content-Type": "application/json" });
+			res.end(
+				JSON.stringify({
+					status: "ok",
+					file: file,
+					id: id,
+					size: info.size,
+					created: info.birthtime,
+					type: mimeFor(file),
+				})
+			);
+		} catch (e) {
+			// file does not exist
+			res.writeHead(404);
+			res.end(
+				JSON.stringify({
+					status: "error",
+					description: "File not found",
+				})
+			);
+			return;
+		}
+	},
+	/**
 	 * Uploaded - shows a confirmation that the file has been uploaded
 	 * @method GET
 	 * @route /uploaded
