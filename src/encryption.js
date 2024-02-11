@@ -1,5 +1,5 @@
 import crypto from 'node:crypto';
-import { config } from './config.js';
+const { ENCRYPTION_KEY, ENCRYPTION_ALGO, ENCRYPTION_ENABLED } = process.env;
 
 /**
  * Encrypts data
@@ -13,20 +13,18 @@ import { config } from './config.js';
  */
 export const encrypt = (data) => {
 	const iv = crypto.randomBytes(16);
-	const algorithm = config.privacy.encryption.algorithm;
-	const encryptionKey = process.env.ENCRYPTION_KEY;
 
-	if (!algorithm || typeof algorithm !== 'string') {
+	if (!ENCRYPTION_ALGO || typeof ENCRYPTION_ALGO !== 'string') {
 		throw new Error('Encryption algorithm is missing or invalid.');
 	}
 
-	if (!encryptionKey || typeof encryptionKey !== 'string') {
+	if (!ENCRYPTION_KEY || typeof ENCRYPTION_KEY !== 'string') {
 		throw new Error('Encryption key is missing or invalid.');
 	}
 
 	const cipher = crypto.createCipheriv(
-		config.privacy.encryption.algorithm,
-		Buffer.from(process.env.ENCRYPTION_KEY),
+		ENCRYPTION_ALGO,
+		Buffer.from(ENCRYPTION_KEY),
 		iv
 	);
 	let encrypted = cipher.update(data);
@@ -48,19 +46,17 @@ export const decrypt = (data) => {
 	const textParts = data.split(':');
 	const iv = Buffer.from(textParts.shift(), 'hex');
 
-	const algorithm = config.privacy.encryption.algorithm;
-	const encryptionKey = process.env.ENCRYPTION_KEY;
-	if (!algorithm || typeof algorithm !== 'string') {
+	if (!ENCRYPTION_ALGO || typeof ENCRYPTION_ALGO !== 'string') {
 		throw new Error('Encryption algorithm is missing or invalid.');
 	}
 
-	if (!encryptionKey || typeof encryptionKey !== 'string') {
+	if (!ENCRYPTION_KEY || typeof ENCRYPTION_KEY !== 'string') {
 		throw new Error('Encryption key is missing or invalid.');
 	}
 	const encryptedText = Buffer.from(textParts.join(':'), 'hex');
 	const decipher = crypto.createDecipheriv(
-		algorithm,
-		Buffer.from(encryptionKey),
+		ENCRYPTION_ALGO,
+		Buffer.from(ENCRYPTION_KEY),
 		iv
 	);
 	let decrypted = decipher.update(encryptedText);

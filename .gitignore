@@ -7,3 +7,6 @@ yarn.lock
 
 .env
 !.env.example
+
+# certs
+ssl

@@ -1,11 +1,21 @@
-import http from 'node:http';
 import { readFile, stat, mkdir, writeFile } from 'node:fs/promises';
 import { Stream } from 'node:stream';
 
 // we want this to be dependency free
 import { fromMime, mimeFor } from './mime.js';
-import { config } from './config.js';
 import { encrypt, decrypt } from './encryption.js';
+
+const {
+	WEB_PORT,
+	APP_DOMAIN,
+	ENCRYPTION_ENABLED,
+	SSL_KEY,
+	SSL_CERT,
+	SSL_ENABLED,
+	UPLOAD_DIRECTORY,
+	UPLOAD_MAX_SIZE,
+	UPLOAD_ID_LEN,
+} = process.env;
 
 const routes = {
 	/**
@@ -25,13 +35,13 @@ const routes = {
 	 * @param {String} file
 	 */
 	'^/d/(.*)/(.*)$': async (req, res, id, file) => {
-		if (id.length !== config.privacy.idLength || file.length === 0) {
+		if (id.length < 1 || file.length === 0) {
 			res.writeHead(404, { 'Content-Type': 'text/html' });
 			res.end(await readFile('./public/error.html'));
 			return;
 		}
 		try {
-			await stat(`./${config.upload.directory}/${id}/${file}`);
+			await stat(`./${UPLOAD_DIRECTORY}/${id}/${file}`);
 		} catch (e) {
 			// file does not exist
 			res.writeHead(302, {
@@ -42,10 +52,10 @@ const routes = {
 		}
 
 		// read file
-		const f = await readFile(`./${config.upload.directory}/${id}/${file}`);
+		const f = await readFile(`./${UPLOAD_DIRECTORY}/${id}/${file}`);
 
 		// decrypt if necessary
-		if (config.privacy.encryption.enabled) {
+		if (ENCRYPTION_ENABLED) {
 			const decrypted = decrypt(f.toString());
 			res.writeHead(200, {
 				'Content-Type': mimeFor(file),
@@ -70,9 +80,7 @@ const routes = {
 	 */
 	'^/i/(.*)/(.*)$': async (req, res, id, file) => {
 		try {
-			const info = await stat(
-				`./${config.upload.directory}/${id}/${file}`
-			);
+			const info = await stat(`./${UPLOAD_DIRECTORY}/${id}/${file}`);
 			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.end(
 				JSON.stringify({
@@ -125,15 +133,15 @@ const routes = {
 		res.setHeader('Content-Type', 'application/json');
 
 		let len = parseInt(req.headers['content-length']);
-		if (isNaN(len) || len <= 0 || len > config.upload.maxSize) {
+		if (isNaN(len) || len <= 0 || len > UPLOAD_MAX_SIZE) {
 			// 1GB
 			res.statusCode = 411;
 			res.end();
 			return;
 		}
 
-		const id = genToken(config.privacy.idLength);
-		mkdir(`./${config.upload.directory}/${id}`);
+		const id = genToken(UPLOAD_ID_LEN ?? 12);
+		mkdir(`./${UPLOAD_DIRECTORY}/${id}`);
 
 		// original filename
 		let name = encodeURIComponent(req.headers['filename']);
@@ -143,7 +151,7 @@ const routes = {
 
 		// create a write stream
 		// const ws = createWriteStream(
-		// 	`./${config.upload.directory}/${id}/${name}`
+		// 	`./${UPLOAD_DIRECTORY}/${id}/${name}`
 		// );
 		// create a temporary stream
 		const ws = new Stream.Writable({
@@ -173,21 +181,15 @@ const routes = {
 
 		req.on('end', () => {
 			ws.close((buf) => {
-				if (config.privacy.encryption.enabled) {
+				if (ENCRYPTION_ENABLED) {
 					// encrypt the file
 					const encrypted = encrypt(buf);
 
 					// write the encrypted file
-					writeFile(
-						`./${config.upload.directory}/${id}/${name}`,
-						encrypted
-					);
+					writeFile(`./${UPLOAD_DIRECTORY}/${id}/${name}`, encrypted);
 				} else {
 					// write the file
-					writeFile(
-						`./${config.upload.directory}/${id}/${name}`,
-						buf
-					);
+					writeFile(`./${UPLOAD_DIRECTORY}/${id}/${name}`, buf);
 				}
 				res.end(
 					JSON.stringify({
@@ -238,8 +240,21 @@ const genToken = (length) => {
 	return result;
 };
 
-http.createServer(handler).listen(config.webserver.port, () => {
+let server = await import('node:http');
+let opts = {};
+
+if (SSL_ENABLED) {
+	try {
+		server = await import('node:https');
+		opts['key'] = await readFile(SSL_KEY, 'utf-8');
+		opts['cert'] = await readFile(SSL_CERT, 'utf-8');
+	} catch (err) {
+		console.error('[!] Error: HTTPS support is not available.');
+	}
+}
+
+server.createServer(opts, handler).listen(WEB_PORT, () => {
 	console.log(
-		`[!] Server running at http://localhost:${config.webserver.port}/`
+		`[!] Server running at ${SSL_ENABLED ? 'https' : 'http'}://${APP_DOMAIN ?? 'localhost'}:${WEB_PORT}/`
 	);
 });
