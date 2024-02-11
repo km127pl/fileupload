@@ -4,7 +4,7 @@ export const config = {
 		directory: "./uploads",
 	},
 	privacy: {
-		idLength: 64,
+		idLength: 12,
 	},
 	webserver: {
 		port: 8080,
