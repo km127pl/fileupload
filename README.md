@@ -19,11 +19,11 @@ A quick file upload server in pure NodeJS and HTML.
 
 ### Todo
 
--   [x] -   Syntax hightlighted preview for code files (.c, .js etc.)
 -   [ ] -   In memory file cache (warm)
 -   [ ] -   Properly use tailwindcss and not the play cdn
 -   [ ] -   [ShareX](https://getsharex.com/) support
 -   [ ] -   Rate limiting (10 per 2 minutes)
+-   [x] -   Syntax hightlighted preview for code files (.c, .js etc.)
 -   [x] -   `/v/{id}/{file}` for previewing files
 -   [x] -   Fix getting a "411 Length Required" on some bigger files
 -   [x] -   Handle images (as well as other Non-UTF8 files)
