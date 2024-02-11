@@ -1,20 +1,20 @@
 {
-	"name": "file-upload",
-	"version": "1.0.0",
-	"main": "src/app.js",
-	"type": "module",
-	"authors": [
-		"km127pl <km127pl@gmail.com>",
-		"zefir <github.com/zefir-git>"
-	],
-	"license": "MIT",
-	"devDependencies": {
-		"nodemon": "^3.0.3",
-		"prettier": "3.2.5"
-	},
-	"scripts": {
-		"start": "node src/app.js",
-		"dev": "nodemon src/app.js",
-		"lint": "prettier --write src/**/*.js"
-	}
+    "name": "file-upload",
+    "version": "1.0.0",
+    "main": "src/app.js",
+    "type": "module",
+    "authors": [
+        "km127pl <km127pl@gmail.com>",
+        "zefir <github.com/zefir-git>"
+    ],
+    "license": "MIT",
+    "devDependencies": {
+        "nodemon": "^3.0.3",
+        "prettier": "3.2.5"
+    },
+    "scripts": {
+        "start": "node src/app.js",
+        "dev": "nodemon src/app.js",
+        "lint": "prettier --write ."
+    }
 }

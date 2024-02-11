@@ -1,59 +1,57 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script src="https://cdn.tailwindcss.com"></script>
-		<title>File Upload</title>
-	</head>
-	<body>
-		<div
-			class="flex flex-col bg-neutral-950 min-h-screen items-center justify-center drop"
-		>
-			<div class="max-w-lg flex flex-col gap-y-6 w-full">
-				<div>
-					<div
-						class="mt-2 flex justify-center rounded-lg border border-dashed border-neutral-800 px-6 py-10 relative"
-					>
-						<div class="text-center">
-							<svg
-								class="mx-auto h-12 w-12 text-neutral-600"
-								viewBox="0 0 24 24"
-								fill="currentColor"
-								aria-hidden="true"
-							>
-								<path
-									fill-rule="evenodd"
-									d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
-									clip-rule="evenodd"
-								/>
-							</svg>
-							<div
-								class="mt-4 flex text-sm leading-6 text-neutral-300"
-							>
-								<label
-									for="file-upload"
-									class="cursor-pointer rounded-md font-semibold text-blue-300 focus-within:outline focus-within:outline-blue-600 focus-within:outline-offset-2 hover:text-blue-400"
-								>
-									<span>Upload a file</span>
-									<span class="absolute inset-0"></span>
-									<input
-										id="file-upload"
-										name="file-upload"
-										type="file"
-										class="sr-only"
-										required
-									/>
-								</label>
-								<p class="pl-1">or drag and drop</p>
-							</div>
-							<p class="text-xs leading-5 text-neutral-300">
-								Maximum file size 1GB
-							</p>
-						</div>
-					</div>
-				</div>
-				<!-- <div class="flex items-center justify-center gap-x-6">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <title>File Upload</title>
+  </head>
+  <body>
+    <div
+      class="flex flex-col bg-neutral-950 min-h-screen items-center justify-center drop"
+    >
+      <div class="max-w-lg flex flex-col gap-y-6 w-full">
+        <div>
+          <div
+            class="mt-2 flex justify-center rounded-lg border border-dashed border-neutral-800 px-6 py-10 relative"
+          >
+            <div class="text-center">
+              <svg
+                class="mx-auto h-12 w-12 text-neutral-600"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z"
+                  clip-rule="evenodd"
+                />
+              </svg>
+              <div class="mt-4 flex text-sm leading-6 text-neutral-300">
+                <label
+                  for="file-upload"
+                  class="cursor-pointer rounded-md font-semibold text-blue-300 focus-within:outline focus-within:outline-blue-600 focus-within:outline-offset-2 hover:text-blue-400"
+                >
+                  <span>Upload a file</span>
+                  <span class="absolute inset-0"></span>
+                  <input
+                    id="file-upload"
+                    name="file-upload"
+                    type="file"
+                    class="sr-only"
+                    required
+                  />
+                </label>
+                <p class="pl-1">or drag and drop</p>
+              </div>
+              <p class="text-xs leading-5 text-neutral-300">
+                Maximum file size 1GB
+              </p>
+            </div>
+          </div>
+        </div>
+        <!-- <div class="flex items-center justify-center gap-x-6">
 					<button
 						type="reset"
 						class="text-sm font-semibold leading-6 text-white outline-white"
@@ -67,62 +65,60 @@
 						Upload
 					</button>
 				</div> -->
-				<!-- <div
+        <!-- <div
           class="block w-full rounded-md border-0 bg-white/5 px-3 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/10 sm:text-sm sm:leading-6"
         >
           https://server.com/whatever/123
         </div> -->
-			</div>
-		</div>
-		<script>
-			document
-				.getElementById("file-upload")
-				.addEventListener("change", (e) => {
-					const file = e.target.files[0];
-					if (file == null) return;
+      </div>
+    </div>
+    <script>
+      document.getElementById('file-upload').addEventListener('change', (e) => {
+        const file = e.target.files[0]
+        if (file == null) return
 
-					// post to /upload
-					fetch("/upload", {
-						method: "POST",
-						headers: {
-							filename: file.name,
-						},
-						body: file,
-					})
-						.then((res) => res.json())
-						.then((data) => {
-							location.href = `/uploaded?id=${data.id}&file=${data.file}`;
-						});
-				});
+        // post to /upload
+        fetch('/upload', {
+          method: 'POST',
+          headers: {
+            filename: file.name,
+          },
+          body: file,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            location.href = `/uploaded?id=${data.id}&file=${data.file}`
+          })
+      })
 
-			// drag and drop upload
-			const drop = document.querySelector(".drop");
-			drop.addEventListener("dragover", (e) => {
-				e.preventDefault();
-				drop.classList.add("bg-neutral-900");
-			});
-			drop.addEventListener("dragleave", (e) => {
-				drop.classList.remove("bg-neutral-900");
-			});
-			drop.addEventListener("drop", (e) => {
-				e.preventDefault();
-				drop.classList.remove("bg-neutral-900");
-				const file = e.dataTransfer.files[0];
-				if (file == null) return;
+      // drag and drop upload
+      const drop = document.querySelector('.drop')
+      drop.addEventListener('dragover', (e) => {
+        e.preventDefault()
+        drop.classList.add('bg-neutral-900')
+      })
+      drop.addEventListener('dragleave', (e) => {
+        drop.classList.remove('bg-neutral-900')
+      })
+      drop.addEventListener('drop', (e) => {
+        e.preventDefault()
+        drop.classList.remove('bg-neutral-900')
+        const file = e.dataTransfer.files[0]
+        if (file == null) return
 
-				// post to /upload
-				fetch("/upload", {
-					method: "POST",
-					headers: {
-						filename: file.name,
-					},
-					body: file,
-				})
-					.then((res) => res.json())
-					.then((data) => {
-						location.href = `/uploaded?id=${data.id}&file=${data.file}`;
-					});
-			});
-		</script>
-	</body>
+        // post to /upload
+        fetch('/upload', {
+          method: 'POST',
+          headers: {
+            filename: file.name,
+          },
+          body: file,
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            location.href = `/uploaded?id=${data.id}&file=${data.file}`
+          })
+      })
+    </script>
+  </body>
 </html>

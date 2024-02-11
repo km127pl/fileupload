@@ -1,76 +1,75 @@
 <!doctype html>
 <html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<script src="https://cdn.tailwindcss.com"></script>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="https://cdn.tailwindcss.com"></script>
 
-		<title>File Upload | {{ filename }}</title>
-	</head>
-	<body>
-		<div class="bg-neutral-950">
-			<div
-				class="flex flex-col sm:max-w-lg mx-auto min-h-screen items-center justify-center"
-			>
-				<div
-					class="flex flex-col w-full bg-neutral-900 p-6 sm:rounded-xl sm:border sm:border-white/5 h-screen sm:h-auto"
-				>
-					<div class="flex items-center gap-2">
-						<p
-							class="text-lg/7 font-semibold tracking-tight sm:text-base/7 text-white"
-						>
-							File Uploaded
-						</p>
-						<svg
-							fill="none"
-							viewBox="0 0 24 24"
-							stroke-width="2"
-							stroke="currentColor"
-							class="w-6 h-6 text-green-400"
-							aria-hidden="true"
-						>
-							<path
-								stroke-linecap="round"
-								stroke-linejoin="round"
-								d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
-							/>
-						</svg>
-					</div>
-					<p
-						data-slot="text"
-						class="mt-8 text-base/6 sm:text-sm/6 text-neutral-400"
-					>
-						Share this link with anyone you want to share the file
-						with.
-					</p>
-					<div class="flex gap-3 mt-2">
-						<label for="link" class="sr-only">File link</label>
-						<input
-							type="text"
-							name="link"
-							id="link"
-							autocomplete="link"
-							class="block w-full rounded-md border-0 bg-white/5 px-3 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/[.1] hover:ring-white/[.2] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 select-all"
-							readonly
-							value="{{ url }}"
-						/>
-						<button
-							class="text-white font-semibold text-sm px-3 py-1.5 shrink-0 border border-white/15 rounded-md hover:bg-white/5 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500"
-							onclick="navigator.clipboard.writeText('{{ url }}')"
-						>
-							Copy link
-						</button>
-					</div>
-					<div class="mt-8 flex">
-						<button
-							class="text-white bg-neutral-600 font-semibold text-sm px-3 py-1.5 shrink-0 border border-white/15 rounded-md hover:bg-neutral-500/70 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500 w-full sm:w-auto"
-							onclick="location.href='/'"
-						>
-							Upload more
-						</button>
-					</div>
-				</div>
-			</div>
-		</div>
-	</body>
+    <title>File Upload | {{ filename }}</title>
+  </head>
+  <body>
+    <div class="bg-neutral-950">
+      <div
+        class="flex flex-col sm:max-w-lg mx-auto min-h-screen items-center justify-center"
+      >
+        <div
+          class="flex flex-col w-full bg-neutral-900 p-6 sm:rounded-xl sm:border sm:border-white/5 h-screen sm:h-auto"
+        >
+          <div class="flex items-center gap-2">
+            <p
+              class="text-lg/7 font-semibold tracking-tight sm:text-base/7 text-white"
+            >
+              File Uploaded
+            </p>
+            <svg
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke-width="2"
+              stroke="currentColor"
+              class="w-6 h-6 text-green-400"
+              aria-hidden="true"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                d="M9 12.75 11.25 15 15 9.75M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"
+              />
+            </svg>
+          </div>
+          <p
+            data-slot="text"
+            class="mt-8 text-base/6 sm:text-sm/6 text-neutral-400"
+          >
+            Share this link with anyone you want to share the file with.
+          </p>
+          <div class="flex gap-3 mt-2">
+            <label for="link" class="sr-only">File link</label>
+            <input
+              type="text"
+              name="link"
+              id="link"
+              autocomplete="link"
+              class="block w-full rounded-md border-0 bg-white/5 px-3 py-1.5 text-white shadow-sm ring-1 ring-inset ring-white/[.1] hover:ring-white/[.2] focus:outline-none focus:ring-2 focus:ring-inset focus:ring-blue-500 sm:text-sm sm:leading-6 select-all"
+              readonly
+              value="{{ url }}"
+            />
+            <button
+              class="text-white font-semibold text-sm px-3 py-1.5 shrink-0 border border-white/15 rounded-md hover:bg-white/5 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500"
+              onclick="navigator.clipboard.writeText('{{ url }}')"
+            >
+              Copy link
+            </button>
+          </div>
+          <div class="mt-8 flex">
+            <button
+              class="text-white bg-neutral-600 font-semibold text-sm px-3 py-1.5 shrink-0 border border-white/15 rounded-md hover:bg-neutral-500/70 focus-within:outline focus-within:outline-2 focus-within:outline-offset-2 focus-within:outline-blue-500 w-full sm:w-auto"
+              onclick="location.href='/'"
+            >
+              Upload more
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
 </html>
