@@ -72,25 +72,31 @@ const routes = {
 			return;
 		}
 
-		let dataBuffer = Buffer.alloc(0);
+		// store data buffer
+		let dataBuffers = [];
 
 		req.on("data", (chunk) => {
-			dataBuffer = Buffer.concat([dataBuffer, chunk]);
+			dataBuffers.push(chunk);
 		});
 
 		req.on("end", async () => {
 			try {
+				// Combine all data chunks into a single buffer
+				const dataBuffer = Buffer.concat(dataBuffers);
+
 				// 1:30 AM: black box don't touch
-				const data = dataBuffer.toString();
 				const boundary = req.headers["content-type"].split("=")[1];
-				const parts = data.split(boundary).slice(1, -1);
+				const parts = dataBuffer
+					.toString()
+					.split(boundary)
+					.slice(1, -1);
 				const files = parts.map((part) => {
 					const match = part.match(/filename="(.*)"/);
 					const name = match ? match[1] : null;
 					const match2 = part.match(/\r\n\r\n([\s\S]*)/);
 					const body = match2 ? match2[1] : null;
 					if (!name || !body) return null;
-					return { name, body };
+					return { name, body: Buffer.from(body) }; // Store body as buffer
 				});
 
 				const id = genToken(12);
@@ -125,17 +131,6 @@ const routes = {
 				res.end(e.message);
 			}
 		});
-	},
-	/**
-	 * A route to get files from uploads folder
-	 * @method GET
-	 * @route /file/{id}/{file}
-	 * @param {String} id
-	 * @param {String} file
-	 */
-	"^/file/(.*)/(.*)": async (req, res, id, file) => {
-		res.writeHead(200);
-		res.end(`${id} ${file}`);
 	},
 };
 
