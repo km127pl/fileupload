@@ -6,9 +6,11 @@ export const config = {
 	privacy: {
 		idLength: 12,
 		encryption: {
+			// Warning: Enabling or disabling encryption will make all previously uploaded files unreadable
+			// Only toggle this if you are sure you want to reset the uploaded files.
 			enabled: true,
 			algorithm: 'aes-256-cbc',
-			// IV and KEY are in the `.env` file
+			// Key is in the `.env` file
 		},
 	},
 	webserver: {
