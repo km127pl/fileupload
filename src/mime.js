@@ -43,3 +43,22 @@ export const mimeFor = (filename) => {
 	const ext = filename.split(".")[1];
 	return mimeTypes[ext];
 };
+
+/**
+ * Gets an extension from a mime type
+ * @param {*} mimeType the mime type
+ * @returns the extension
+ * @example of using the function
+ * ```js
+ * const ext = fromMime("text/plain");
+ * console.log(ext); // => .txt
+ * ```
+ */
+export const fromMime = (mimeType) => {
+	for (const ext in mimeTypes) {
+		if (mimeTypes.hasOwnProperty(ext) && mimeTypes[ext] === mimeType) {
+			return ext;
+		}
+	}
+	return null;
+};

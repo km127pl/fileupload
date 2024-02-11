@@ -4,7 +4,8 @@ A quick file upload server in pure NodeJS and HTML.
 
 ### Todo
 
-- [ ] - Handle images (as well as other Non-UTF8 files)
+- [x] - Handle images (as well as other Non-UTF8 files)
+- [ ] - Syntax hightlighted preview for code files (.c, .js etc.)
 - [ ] - `/i/{id}/{file}` for basic file info (size, mime, uploaded at, etc.)
 - [ ] - `/v/{id}/{file}` for previewing files
 - [ ] - `/d/{id}/{file}` for direct downloading files

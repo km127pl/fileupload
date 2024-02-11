@@ -10,12 +10,7 @@
 		<div
 			class="flex flex-col bg-neutral-950 min-h-screen items-center justify-center"
 		>
-			<form
-				class="max-w-lg flex flex-col gap-y-6 w-full"
-				action="/upload"
-				method="post"
-				enctype="multipart/form-data"
-			>
+			<div class="max-w-lg flex flex-col gap-y-6 w-full">
 				<div>
 					<div
 						class="mt-2 flex justify-center rounded-lg border border-dashed border-neutral-800 px-6 py-10 relative"
@@ -77,7 +72,28 @@
         >
           https://server.com/whatever/123
         </div> -->
-			</form>
+			</div>
 		</div>
+		<script>
+			document
+				.getElementById("file-upload")
+				.addEventListener("change", (e) => {
+					const file = e.target.files[0];
+					if (file == null) return;
+
+					// post to /upload
+					fetch("/upload", {
+						method: "POST",
+						headers: {
+							filename: file.name,
+						},
+						body: file,
+					})
+						.then((res) => res.json())
+						.then((data) => {
+							location.href = `/uploaded?id=${data.id}&file=${data.file}`;
+						});
+				});
+		</script>
 	</body>
 </html>

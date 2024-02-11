@@ -1,8 +1,10 @@
 import http from "node:http";
-import { readFile, stat, writeFile, mkdir } from "node:fs/promises";
+import { readFile, stat, mkdir } from "node:fs/promises";
+
+import { createWriteStream } from "node:fs";
 
 // we want this to be dependency free
-import { mimeFor, mimeTypes } from "./mime.js";
+import { fromMime, mimeFor } from "./mime.js";
 
 const routes = {
 	/**
@@ -51,12 +53,10 @@ const routes = {
 	 */
 	"^\\/uploaded\\?id=(.*)&file=(.*)$": async (req, res, id, file) => {
 		res.writeHead(200, { "Content-Type": "text/html" });
+		console.log(req);
 		const page = (await readFile("./public/uploaded.html", "utf-8"))
 			.toString()
-			.replaceAll(
-				"{{ url }}",
-				`https://${req.headers.host}/d/${id}/${file}`
-			)
+			.replaceAll("{{ url }}", `${req.headers.referer}d/${id}/${file}`)
 			.replaceAll("{{ filename }}", `${file}`);
 		res.end(page);
 	},
@@ -71,65 +71,46 @@ const routes = {
 			res.end("Error: Method not allowed, this route only accepts POST");
 			return;
 		}
+		res.setHeader("Content-Type", "application/json");
 
-		// store data buffer
-		let dataBuffers = [];
+		let len = parseInt(req.headers["content-length"]);
+		if (isNaN(len) || len <= 0) {
+			res.statusCode = 411;
+			res.end();
+			return;
+		}
 
-		req.on("data", (chunk) => {
-			dataBuffers.push(chunk);
+		const id = genToken(12);
+		mkdir(`./uploads/${id}`);
+
+		// original filename
+		let name = req.headers["filename"];
+		if (name == null) {
+			name = `${genToken(6)}.${fromMime(req.headers["content-type"])}`;
+		}
+
+		// create a write stream
+		const ws = createWriteStream(`./uploads/${id}/${name}`);
+
+		ws.on("error", (error) => {
+			console.error(error);
+			res.statusCode = 400;
+			res.write(JSON.stringify({ status: "error", description: error }));
+			res.end();
 		});
 
-		req.on("end", async () => {
-			try {
-				// Combine all data chunks into a single buffer
-				const dataBuffer = Buffer.concat(dataBuffers);
+		// pipe the request to the write stream
+		req.pipe(ws);
 
-				// 1:30 AM: black box don't touch
-				const boundary = req.headers["content-type"].split("=")[1];
-				const parts = dataBuffer
-					.toString()
-					.split(boundary)
-					.slice(1, -1);
-				const files = parts.map((part) => {
-					const match = part.match(/filename="(.*)"/);
-					const name = match ? match[1] : null;
-					const match2 = part.match(/\r\n\r\n([\s\S]*)/);
-					const body = match2 ? match2[1] : null;
-					if (!name || !body) return null;
-					return { name, body: Buffer.from(body) }; // Store body as buffer
-				});
-
-				const id = genToken(12);
-				let fileName;
-				// get a list of files to upload
-				//@TODO: bulk file upload from frontend
-				for (const file of files) {
-					if (file == undefined) {
-						res.writeHead(302, {
-							Location: "/",
-						});
-					}
-					await mkdir(`./uploads/${id}`).then((err) => {
-						if (err) {
-							//@TODO: better error handling
-							console.error(err);
-							res.end("Error whilst uploading");
-							return;
-						}
-					});
-					await writeFile(`./uploads/${id}/${file.name}`, file.body);
-					fileName = file.name;
-				}
-
-				res.writeHead(302, {
-					Location: `/uploaded?id=${id}&file=${fileName}`,
-				});
-				res.end("Files uploaded");
-			} catch (e) {
-				//@TODO: better error handling
-				console.error(e);
-				res.end(e.message);
-			}
+		req.on("end", () => {
+			ws.close(() => {
+				res.end(
+					JSON.stringify({
+						file: name,
+						id: id,
+					})
+				);
+			});
 		});
 	},
 };
