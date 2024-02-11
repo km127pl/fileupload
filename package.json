@@ -1,0 +1,14 @@
+{
+	"name": "file-upload",
+	"version": "1.0.0",
+	"main": "src/app.js",
+	"type": "module",
+	"authors": [
+		"km127pl <km127pl@gmail.com>",
+		"zefir <github.com/zefir-git>"
+	],
+	"license": "MIT",
+	"devDependencies": {
+		"nodemon": "^3.0.3"
+	}
+}
