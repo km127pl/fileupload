@@ -34,7 +34,6 @@ const routes = {
 		}
 
 		// read file
-		console.log(`./uploads/${id}/${file}`);
 		const f = await readFile(`./uploads/${id}/${file}`);
 
 		// send file
@@ -57,7 +56,8 @@ const routes = {
 			.replaceAll(
 				"{{ url }}",
 				`https://${req.headers.host}/d/${id}/${file}`
-			);
+			)
+			.replaceAll("{{ filename }}", `${file}`);
 		res.end(page);
 	},
 	/**
@@ -140,7 +140,6 @@ const routes = {
 };
 
 const handler = async (req, res) => {
-	console.log(req.url);
 	const route = Object.keys(routes).filter((route) =>
 		req.url.match(route)
 	)[0];
