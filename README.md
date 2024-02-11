@@ -21,13 +21,11 @@ A quick file upload server in pure NodeJS and HTML.
 -   [x] -   Full on drag n' drop support on `/`
 -   [x] -   File size limits
 -   [ ] -   Properly use tailwindcss and not the play cdn
--   [ ] -   File encryption\*
+-   [x] -   File encryption
 -   [ ] -   Syntax hightlighted preview for code files (.c, .js etc.)
 -   [x] -   `/i/{id}/{file}` for basic file info (size, mime, uploaded at, etc.)
 -   [ ] -   `/v/{id}/{file}` for previewing files
 -   [x] -   `/d/{id}/{file}` for direct downloading files
-
-\*Would probably require authentication of some sorts, so only a certain user can download a file.
 
 ### Routes
 
