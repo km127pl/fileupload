@@ -53,7 +53,6 @@ const routes = {
 	 */
 	"^\\/uploaded\\?id=(.*)&file=(.*)$": async (req, res, id, file) => {
 		res.writeHead(200, { "Content-Type": "text/html" });
-		console.log(req);
 		const page = (await readFile("./public/uploaded.html", "utf-8"))
 			.toString()
 			.replaceAll("{{ url }}", `${req.headers.referer}d/${id}/${file}`)
@@ -74,7 +73,8 @@ const routes = {
 		res.setHeader("Content-Type", "application/json");
 
 		let len = parseInt(req.headers["content-length"]);
-		if (isNaN(len) || len <= 0) {
+		if (isNaN(len) || len <= 0 || len > 1024 * 1024 * 1024) {
+			// 1GB
 			res.statusCode = 411;
 			res.end();
 			return;
