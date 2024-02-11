@@ -22,6 +22,10 @@ A quick file upload server in pure NodeJS and HTML.
 -   [ ] -   In memory file cache (warm)
 -   [ ] -   Rate limiting (10 per 2 minutes)
 -   [ ] -   Client side error handling
+-   [ ] -   File expiration
+-   [ ] -   File deletion
+-   [ ] -   Admin file dashboard
+-   [ ] -   Quota limits
 -   [x] -   [ShareX](https://getsharex.com/) support
 -   [x] -   Properly use tailwindcss and not the play cdn
 -   [x] -   Syntax hightlighted preview for code files (.c, .js etc.)
