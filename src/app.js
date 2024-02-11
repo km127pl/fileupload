@@ -25,6 +25,11 @@ const routes = {
 	 * @param {String} file
 	 */
 	'^/d/(.*)/(.*)$': async (req, res, id, file) => {
+		if (id.length !== config.privacy.idLength || file.length === 0) {
+			res.writeHead(404, { 'Content-Type': 'text/html' });
+			res.end(await readFile('./public/error.html'));
+			return;
+		}
 		try {
 			await stat(`./${config.upload.directory}/${id}/${file}`);
 		} catch (e) {
