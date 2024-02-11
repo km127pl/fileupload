@@ -1,10 +1,11 @@
-import http from 'node:http'
-import { readFile, stat, mkdir } from 'node:fs/promises'
-import { createWriteStream } from 'node:fs'
+import http from 'node:http';
+import { readFile, stat, mkdir, writeFile } from 'node:fs/promises';
+import { Stream } from 'node:stream';
 
 // we want this to be dependency free
-import { fromMime, mimeFor } from './mime.js'
-import { config } from './config.js'
+import { fromMime, mimeFor } from './mime.js';
+import { config } from './config.js';
+import { encrypt, decrypt } from './encryption.js';
 
 const routes = {
 	/**
@@ -13,8 +14,8 @@ const routes = {
 	 * @route /
 	 */
 	'^/$': async (req, res) => {
-		res.writeHead(200, { 'Content-Type': 'text/html' })
-		res.end(await readFile('./public/index.html'))
+		res.writeHead(200, { 'Content-Type': 'text/html' });
+		res.end(await readFile('./public/index.html'));
 	},
 	/**
 	 * File download page
@@ -25,24 +26,34 @@ const routes = {
 	 */
 	'^/d/(.*)/(.*)$': async (req, res, id, file) => {
 		try {
-			await stat(`./${config.upload.directory}/${id}/${file}`)
+			await stat(`./${config.upload.directory}/${id}/${file}`);
 		} catch (e) {
 			// file does not exist
 			res.writeHead(302, {
 				Location: '/',
-			})
-			res.end()
-			return
+			});
+			res.end();
+			return;
 		}
 
 		// read file
-		const f = await readFile(`./${config.upload.directory}/${id}/${file}`)
+		const f = await readFile(`./${config.upload.directory}/${id}/${file}`);
+
+		// decrypt if necessary
+		if (config.privacy.encryption.enabled) {
+			const decrypted = decrypt(f.toString());
+			res.writeHead(200, {
+				'Content-Type': mimeFor(file),
+			});
+			res.end(decrypted);
+			return;
+		}
 
 		// send file
 		res.writeHead(200, {
 			'Content-Type': mimeFor(file),
-		})
-		res.end(f)
+		});
+		res.end(f);
 	},
 	/**
 	 * File info page
@@ -56,8 +67,8 @@ const routes = {
 		try {
 			const info = await stat(
 				`./${config.upload.directory}/${id}/${file}`
-			)
-			res.writeHead(200, { 'Content-Type': 'application/json' })
+			);
+			res.writeHead(200, { 'Content-Type': 'application/json' });
 			res.end(
 				JSON.stringify({
 					status: 'ok',
@@ -67,17 +78,17 @@ const routes = {
 					created: info.birthtime,
 					type: mimeFor(file),
 				})
-			)
+			);
 		} catch (e) {
 			// file does not exist
-			res.writeHead(404)
+			res.writeHead(404);
 			res.end(
 				JSON.stringify({
 					status: 'error',
 					description: 'File not found',
 				})
-			)
-			return
+			);
+			return;
 		}
 	},
 	/**
@@ -88,12 +99,12 @@ const routes = {
 	 * @query file - the file (e.g. file.txt)
 	 */
 	'^\\/uploaded\\?id=(.*)&file=(.*)$': async (req, res, id, file) => {
-		res.writeHead(200, { 'Content-Type': 'text/html' })
+		res.writeHead(200, { 'Content-Type': 'text/html' });
 		const page = (await readFile('./public/uploaded.html', 'utf-8'))
 			.toString()
 			.replaceAll('{{ url }}', `${req.headers.referer}d/${id}/${file}`)
-			.replaceAll('{{ filename }}', `${file}`)
-		res.end(page)
+			.replaceAll('{{ filename }}', `${file}`);
+		res.end(page);
 	},
 	/**
 	 * A route to upload files
@@ -102,69 +113,102 @@ const routes = {
 	 */
 	'^/upload$': async (req, res) => {
 		if (req.method != 'POST') {
-			res.writeHead(405)
-			res.end('Error: Method not allowed, this route only accepts POST')
-			return
+			res.writeHead(405);
+			res.end('Error: Method not allowed, this route only accepts POST');
+			return;
 		}
-		res.setHeader('Content-Type', 'application/json')
+		res.setHeader('Content-Type', 'application/json');
 
-		let len = parseInt(req.headers['content-length'])
+		let len = parseInt(req.headers['content-length']);
 		if (isNaN(len) || len <= 0 || len > config.upload.maxSize) {
 			// 1GB
-			res.statusCode = 411
-			res.end()
-			return
+			res.statusCode = 411;
+			res.end();
+			return;
 		}
 
-		const id = genToken(config.privacy.idLength)
-		mkdir(`./${config.upload.directory}/${id}`)
+		const id = genToken(config.privacy.idLength);
+		mkdir(`./${config.upload.directory}/${id}`);
 
 		// original filename
-		let name = encodeURIComponent(req.headers['filename'])
+		let name = encodeURIComponent(req.headers['filename']);
 		if (name == null) {
-			name = `${genToken(6)}.${fromMime(req.headers['content-type'])}`
+			name = `${genToken(6)}.${fromMime(req.headers['content-type'])}`;
 		}
 
 		// create a write stream
-		const ws = createWriteStream(
-			`./${config.upload.directory}/${id}/${name}`
-		)
+		// const ws = createWriteStream(
+		// 	`./${config.upload.directory}/${id}/${name}`
+		// );
+		// create a temporary stream
+		const ws = new Stream.Writable({
+			objectMode: true,
+			write(chunk, encoding, callback) {
+				// Store the chunk of data in an array
+				this.data.push(chunk);
+				callback();
+			},
+		});
+
+		ws.data = [];
+		ws.close = (callback) => {
+			const data = Buffer.concat(ws.data);
+			callback(data);
+		};
 
 		ws.on('error', (error) => {
-			console.error(error)
-			res.statusCode = 400
-			res.write(JSON.stringify({ status: 'error', description: error }))
-			res.end()
-		})
+			console.error(error);
+			res.statusCode = 400;
+			res.write(JSON.stringify({ status: 'error', description: error }));
+			res.end();
+		});
 
 		// pipe the request to the write stream
-		req.pipe(ws)
+		req.pipe(ws);
 
 		req.on('end', () => {
-			ws.close(() => {
+			ws.close((buf) => {
+				if (config.privacy.encryption.enabled) {
+					// encrypt the file
+					const encrypted = encrypt(buf);
+
+					// write the encrypted file
+					writeFile(
+						`./${config.upload.directory}/${id}/${name}`,
+						encrypted
+					);
+				} else {
+					// write the file
+					writeFile(
+						`./${config.upload.directory}/${id}/${name}`,
+						buf
+					);
+				}
 				res.end(
 					JSON.stringify({
 						file: name,
 						id: id,
 					})
-				)
-			})
-		})
+				);
+			});
+		});
 	},
-}
+};
 
 const handler = async (req, res) => {
-	const route = Object.keys(routes).filter((route) => req.url.match(route))[0]
+	const route = Object.keys(routes).filter((route) =>
+		req.url.match(route)
+	)[0];
 
 	if (!route) {
-		res.writeHead(404, { 'Content-Type': 'text/html' })
-		res.end(await readFile('./public/error.html'))
-		return
+		res.writeHead(404, { 'Content-Type': 'text/html' });
+		res.end(await readFile('./public/error.html'));
+		return;
 	}
 
-	const params = req.url.match(route)
-	return routes[route](req, res, ...params.slice(1))
-}
+	const params = req.url.match(route);
+	return routes[route](req, res, ...params.slice(1));
+};
 
 /**
  * Creates a random token of n length
@@ -173,24 +217,24 @@ const handler = async (req, res) => {
  * @returns the random token
  */
 const genToken = (length) => {
-	let result = ''
+	let result = '';
 	const characters =
-		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-	const charactersLength = characters.length
-	let counter = 0
+		'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+	const charactersLength = characters.length;
+	let counter = 0;
 
 	while (counter < length) {
 		result += characters.charAt(
 			Math.floor(Math.random() * charactersLength)
-		)
-		counter += 1
+		);
+		counter += 1;
 	}
 
-	return result
-}
+	return result;
+};
 
 http.createServer(handler).listen(config.webserver.port, () => {
 	console.log(
 		`[!] Server running at http://localhost:${config.webserver.port}/`
-	)
-})
+	);
+});

@@ -13,8 +13,8 @@
 		"prettier": "3.2.5"
 	},
 	"scripts": {
-		"start": "node src/app.js",
-		"dev": "nodemon src/app.js",
+		"start": "node --env-file=.env src/app.js",
+		"dev": "nodemon --env-file=.env src/app.js",
 		"lint": "prettier --write ."
 	}
 }

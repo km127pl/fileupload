@@ -5,8 +5,13 @@ export const config = {
 	},
 	privacy: {
 		idLength: 12,
+		encryption: {
+			enabled: true,
+			algorithm: 'aes-256-cbc',
+			// IV and KEY are in the `.env` file
+		},
 	},
 	webserver: {
 		port: 8080,
 	},
-}
+};

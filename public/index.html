@@ -74,8 +74,8 @@
 		</div>
 		<script>
 			document.getElementById('file-upload').addEventListener('change', (e) => {
-				const file = e.target.files[0]
-				if (file == null) return
+				const file = e.target.files[0];
+				if (file == null) return;
 
 				// post to /upload
 				fetch('/upload', {
@@ -87,24 +87,24 @@
 				})
 					.then((res) => res.json())
 					.then((data) => {
-						location.href = `/uploaded?id=${data.id}&file=${data.file}`
-					})
-			})
+						location.href = `/uploaded?id=${data.id}&file=${data.file}`;
+					});
+			});
 
 			// drag and drop upload
-			const drop = document.querySelector('.drop')
+			const drop = document.querySelector('.drop');
 			drop.addEventListener('dragover', (e) => {
-				e.preventDefault()
-				drop.classList.add('bg-neutral-900')
-			})
+				e.preventDefault();
+				drop.classList.add('bg-neutral-900');
+			});
 			drop.addEventListener('dragleave', (e) => {
-				drop.classList.remove('bg-neutral-900')
-			})
+				drop.classList.remove('bg-neutral-900');
+			});
 			drop.addEventListener('drop', (e) => {
-				e.preventDefault()
-				drop.classList.remove('bg-neutral-900')
-				const file = e.dataTransfer.files[0]
-				if (file == null) return
+				e.preventDefault();
+				drop.classList.remove('bg-neutral-900');
+				const file = e.dataTransfer.files[0];
+				if (file == null) return;
 
 				// post to /upload
 				fetch('/upload', {
@@ -116,9 +116,9 @@
 				})
 					.then((res) => res.json())
 					.then((data) => {
-						location.href = `/uploaded?id=${data.id}&file=${data.file}`
-					})
-			})
+						location.href = `/uploaded?id=${data.id}&file=${data.file}`;
+					});
+			});
 		</script>
 	</body>
 </html>

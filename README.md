@@ -7,6 +7,14 @@
 
 A quick file upload server in pure NodeJS and HTML.
 
+## Setup
+
+-   Requires Node 18 or higher (20.x for encryption)
+-   Clone the repo
+-   Copy `.env.example` to `.env` and fill in the values if you need encryption
+-   Adjust `src/config.js` if needed
+-   Run it with `npm start` or `node src/app.js`
+
 ### Todo
 
 -   [x] -   Handle images (as well as other Non-UTF8 files)

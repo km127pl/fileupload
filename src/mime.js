@@ -26,7 +26,7 @@ export const mimeTypes = {
 	cs: 'text/x-csharp',
 	sh: 'application/x-sh',
 	sql: 'application/sql',
-}
+};
 
 /**
  * Gets a mime type for a file name
@@ -39,10 +39,10 @@ export const mimeTypes = {
  * ```
  */
 export const mimeFor = (filename) => {
-	console.log(filename)
-	const ext = filename.split('.')[1]
-	return mimeTypes[ext] || 'application/octet-stream'
-}
+	console.log(filename);
+	const ext = filename.split('.')[1];
+	return mimeTypes[ext] || 'application/octet-stream';
+};
 
 /**
  * Gets an extension from a mime type
@@ -57,8 +57,8 @@ export const mimeFor = (filename) => {
 export const fromMime = (mimeType) => {
 	for (const ext in mimeTypes) {
 		if (mimeTypes.hasOwnProperty(ext) && mimeTypes[ext] === mimeType) {
-			return ext
+			return ext;
 		}
 	}
-	return null
-}
+	return null;
+};
