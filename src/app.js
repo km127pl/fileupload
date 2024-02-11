@@ -1,5 +1,8 @@
 import http from "node:http";
-import { readFile, writeFile, mkdir } from "node:fs/promises";
+import { readFile, stat, writeFile, mkdir } from "node:fs/promises";
+
+// we want this to be dependency free
+import { mimeFor, mimeTypes } from "./mime.js";
 
 const routes = {
 	/**
@@ -10,6 +13,35 @@ const routes = {
 	"^/$": async (req, res) => {
 		res.writeHead(200, { "Content-Type": "text/html" });
 		res.end(await readFile("./public/index.html"));
+	},
+	/**
+	 * File download page
+	 * @method GET
+	 * @route /d/
+	 * @param {String} id
+	 * @param {String} file
+	 */
+	"^/d/(.*)/(.*)$": async (req, res, id, file) => {
+		try {
+			await stat(`./uploads/${id}/${file}`);
+		} catch (e) {
+			// file does not exist
+			res.writeHead(302, {
+				Location: "/",
+			});
+			res.end();
+			return;
+		}
+
+		// read file
+		console.log(`./uploads/${id}/${file}`);
+		const f = await readFile(`./uploads/${id}/${file}`);
+
+		// send file
+		res.writeHead(200, {
+			"Content-Type": mimeFor(file),
+		});
+		res.end(f);
 	},
 	/**
 	 * Uploaded - shows a confirmation that the file has been uploaded
@@ -98,8 +130,8 @@ const routes = {
 	 * A route to get files from uploads folder
 	 * @method GET
 	 * @route /file/{id}/{file}
-	 * @param {*} id
-	 * @param {*} file
+	 * @param {String} id
+	 * @param {String} file
 	 */
 	"^/file/(.*)/(.*)": async (req, res, id, file) => {
 		res.writeHead(200);
