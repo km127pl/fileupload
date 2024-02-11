@@ -54,12 +54,17 @@ export const decrypt = (data) => {
 		throw new Error('Encryption key is missing or invalid.');
 	}
 	const encryptedText = Buffer.from(textParts.join(':'), 'hex');
-	const decipher = crypto.createDecipheriv(
-		ENCRYPTION_ALGO,
-		Buffer.from(ENCRYPTION_KEY),
-		iv
-	);
-	let decrypted = decipher.update(encryptedText);
-	decrypted = Buffer.concat([decrypted, decipher.final()]);
-	return decrypted; // return a buffer
+	try {
+		const decipher = crypto.createDecipheriv(
+			ENCRYPTION_ALGO,
+			Buffer.from(ENCRYPTION_KEY),
+			iv
+		);
+		let decrypted = decipher.update(encryptedText);
+		decrypted = Buffer.concat([decrypted, decipher.final()]);
+		return decrypted; // return a buffer
+	} catch (error) {
+		console.error('Error: Unable to decrypt data\n', error);
+		return null;
+	}
 };

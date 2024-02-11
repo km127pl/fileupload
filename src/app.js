@@ -223,6 +223,8 @@ const routes = {
 			return;
 		}
 
+		let formfile = false;
+
 		const id = genToken(UPLOAD_ID_LEN ?? 12);
 		mkdir(`./${UPLOAD_DIRECTORY}/${id}`);
 
@@ -232,10 +234,10 @@ const routes = {
 			name = `${genToken(6)}.${fromMime(req.headers['content-type'])}`;
 		}
 
-		// create a write stream
-		// const ws = createWriteStream(
-		// 	`./${UPLOAD_DIRECTORY}/${id}/${name}`
-		// );
+		if (req.headers['content-type'].includes('multipart/form-data')) {
+			formfile = true && process.env.FORMFILE_SUPPORT === 'true';
+		}
+
 		// create a temporary stream
 		const ws = new Stream.Writable({
 			objectMode: true,
@@ -264,6 +266,19 @@ const routes = {
 
 		req.on('end', () => {
 			ws.close((buf) => {
+				if (formfile) {
+					let header = buf
+						.toString()
+						.split('\r\n')
+						.slice(0, 8)
+						.join('\r\n');
+					let filename = header.match(/filename="(.+)"/)[0];
+					name = filename.split('"')[1];
+
+					buf = buf.slice(header.length);
+					buf = buf.slice(0, buf.length - 41);
+					buf = buf.slice(2, buf.length - 2);
+				}
 				if (ENCRYPTION_ENABLED === 'true') {
 					// encrypt the file
 					const encrypted = encrypt(buf);

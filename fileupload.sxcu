@@ -1,0 +1,13 @@
+{
+	"Version": "0.0.1",
+	"Name": "fileupload",
+	"DestinationType": "ImageUploader, TextUploader, FileUploader",
+	"RequestMethod": "POST",
+	"RequestURL": "https://upload.local/upload",
+	"Body": "JSON",
+	"Arguments": {
+		"filenane": "$filename"
+	},
+	"FileFormName": "file",
+	"URL": "https://upload.local/d/$json:id$/$json:file$"
+}
