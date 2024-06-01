@@ -442,4 +442,7 @@ createServer(opts, handler).listen(WEB_PORT, () => {
 	console.log(`\t- WEB_USE_HTTP2: ${WEB_USE_HTTP2}`);
 	console.log(`\t- UPLOAD_DIRECTORY: ${UPLOAD_DIRECTORY}`);
 	console.log(`\t- CACHE_ENABLED: ${CACHE_ENABLED}`);
+
+	// create upload directory if it doesn't exist
+	mkdir(UPLOAD_DIRECTORY).catch(() => {});
 });
