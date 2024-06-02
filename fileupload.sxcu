@@ -6,7 +6,7 @@
 	"RequestURL": "https://upload.local/upload",
 	"Body": "JSON",
 	"Arguments": {
-		"filenane": "$filename"
+		"filename": "$filename"
 	},
 	"FileFormName": "file",
 	"URL": "https://upload.local/d/$json:id$/$json:file$"

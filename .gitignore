@@ -10,3 +10,7 @@ yarn.lock
 
 # certs
 ssl
+
+# css build
+public/main.css
+*.css

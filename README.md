@@ -14,6 +14,8 @@ A quick file upload server in pure NodeJS and HTML.
 
 -   Requires Node 18 or higher (20.x for encryption)
 -   Clone the repo
+-   Install dev dependencies `npm i -D` (required for Tailwind)
+-   Build the css `npm run css` (you can remove `node_modules` after this)
 -   Copy `.env.example` to `.env` and fill in the values, if you need encryption use `openssl rand -hex 16` for the key.
 -   Run it with `npm start` or `node --env-file=.env src/app.js`
 
