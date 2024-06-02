@@ -4,6 +4,7 @@ uploads/
 # npm packages (dev only)
 node_modules/
 yarn.lock
+package-lock.json
 
 *.env*
 !.env.example
